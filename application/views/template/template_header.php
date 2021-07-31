@@ -33,6 +33,10 @@ License: You must have a valid license purchased only from themeforest(the above
 		<link href="<?php echo base_url() ?>/dist/assets/plugins/global/plugins.bundle.css?v=7.2.8" rel="stylesheet" type="text/css" />
 		<link href="<?php echo base_url() ?>/dist/assets/plugins/custom/prismjs/prismjs.bundle.css?v=7.2.8" rel="stylesheet" type="text/css" />
 		<link href="<?php echo base_url() ?>/dist/assets/css/style.bundle.css?v=7.2.8" rel="stylesheet" type="text/css" />
+
+		<!--begin::Page Vendors Styles(used by this page)-->
+		<link href="<?php echo base_url() ?>/dist/assets/plugins/custom/datatables/datatables.bundle.css?v=7.2.8" rel="stylesheet" type="text/css" />
+
 		<!--end::Global Theme Styles-->
 		<!--begin::Layout Themes(used by all pages)-->
 		<!--end::Layout Themes-->
@@ -158,18 +162,18 @@ License: You must have a valid license purchased only from themeforest(the above
 												<!--begin::Nav-->
 												<ul class="menu-nav">
 													<li class="menu-item menu-item-active" aria-haspopup="true">
-														<a href="/metronic/demo7/index.html" class="menu-link">
+														<a href="<?php echo base_url('dashboard') ?>" class="menu-link">
 															<span class="menu-text">Dashboard</span>
 														</a>
 													</li>
 													<li class="menu-item menu-item-submenu menu-item-rel" data-menu-toggle="click" aria-haspopup="true">
-														<a href="javascript:;" class="menu-link">
+														<a href="<?php echo base_url('crawling') ?>" class="menu-link">
 															<span class="menu-text">Crawling</span>
 															<span class="menu-desc"></span>
 														</a>
 													</li>
 													<li class="menu-item menu-item-submenu menu-item-rel" aria-haspopup="true">
-														<a href="javascript:;" class="menu-link">
+														<a href="<?php echo base_url('Preprocessing') ?>" class="menu-link">
 															<span class="menu-text">Preprocessing</span>
 															<span class="menu-desc"></span>
 														</a>

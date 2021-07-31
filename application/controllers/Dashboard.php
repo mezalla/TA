@@ -11,21 +11,16 @@
         
 
         public function index(){
-             
-            echo "Mbak Mella";
-        }    
-
-
-
-
-        function pembuatanTemplate() {
-
+            
+            // header
             $this->load->view('template/template_header');
 
+            // content
             $this->load->view('dashboard/V_dashboard');
 
+            // footer
             $this->load->view('template/template_footer');
-        }
+        }    
     }
     
     /* End of file Dashboard.php */

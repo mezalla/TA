@@ -998,6 +998,21 @@
 		<!--end::Page Vendors-->
 		<!--begin::Page Scripts(used by this page)-->
 		<script src="<?php echo base_url() ?>/dist/assets/js/pages/widgets.js?v=7.2.8"></script>
+
+		<!--begin::Page Vendors(used by this page)-->
+		<script src="<?php echo base_url() ?>/dist/assets/plugins/custom/datatables/datatables.bundle.js?v=7.2.8"></script>
+		<!--end::Page Vendors-->
+		<!--begin::Page Scripts(used by this page)-->
+		<!-- <script src="<?php echo base_url() ?>/dist/assets/js/pages/crud/datatables/basic/basic.js?v=7.2.8"></script> -->
+
+		<script>
+
+			var table = $('#kt_datatable');
+
+			// begin first table
+			table.DataTable();
+
+		</script>
 		<!--end::Page Scripts-->
 	</body>
 	<!--end::Body-->

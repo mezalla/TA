@@ -9,7 +9,7 @@ from sklearn.metrics import classification_report
 from sklearn.metrics import confusion_matrix
 from sklearn.metrics import accuracy_score
 from sklearn.metrics import mean_absolute_error
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 from sklearn.metrics import plot_confusion_matrix
 
 #----------------------------- IMPORT DATA ---------------------------------------
@@ -21,7 +21,7 @@ label_list = []
 def get_mysql():
     try:
         connection = mysql.connector.connect(host='localhost',
-                                             database='bismillah',
+                                             database='2107-reqtamultinomial-mella',
                                              user='root',
                                              password='',
                                              charset='utf8')
@@ -48,7 +48,7 @@ def get_mysql():
 def get_mysql2():
     try:
         connection = mysql.connector.connect(host='localhost',
-                                             database='bismillah',
+                                             database='2107-reqtamultinomial-mella',
                                              user='root',
                                              password='',
                                              charset='utf8')
@@ -87,19 +87,23 @@ data = pd.DataFrame({'tweet':tweet_list,
                     'label':label_list})
 
 
+
 # Pembagian data training & testing
 
 x_train, x_test, y_train, y_test = train_test_split(data['tweet'], data['label'], train_size=0.8, 
                                                     test_size=0.2)
 
 train_data = pd.DataFrame({'tweet':x_train, 'label':y_train})
+
+
+
 test_data = pd.DataFrame({'tweet':x_test, 'label':y_test})
 
 train_data.reset_index(drop=True, inplace=True)
 test_data.reset_index(drop=True, inplace=True)
 
 # Ukuran data training atau total seluruh kelas
-print('Ukuran data train:', train_data.shape)
+# print('Ukuran data train:', train_data.shape)
 n_train = train_data.shape[0]
 
 test_data['label'].value_counts()
@@ -107,6 +111,8 @@ train_data['label'].value_counts(ascending=True)
 
 kelas_true = train_data['label'].value_counts()['true']
 kelas_fake = train_data['label'].value_counts()['fake']
+
+print( kelas_true )
 
 #----------------------------- FUNCTION ---------------------------------------
 
@@ -334,7 +340,7 @@ df_10 = tf_1[tf_1.index.isin(ig_10['Term'])].rename_axis('Term').reset_index()
 # df_80 = df_80.drop(df_80.columns[len(df_80.columns)-1], axis=1)
 # df_70 = df_70.drop(df_70.columns[len(df_70.columns)-1], axis=1)
 # df_60 = df_60.drop(df_60.columns[len(df_60.columns)-1], axis=1)
-df_50 = df_50.drop(df_50.columns[len(df_50.columns)-1], axis=1)
+# df_50 = df_50.drop(df_50.columns[len(df_50.columns)-1], axis=1)
 # df_40 = df_40.drop(df_40.columns[len(df_40.columns)-1], axis=1)
 # df_30 = df_30.drop(df_30.columns[len(df_30.columns)-1], axis=1)
 # df_20 = df_20.drop(df_20.columns[len(df_20.columns)-1], axis=1)
@@ -345,15 +351,15 @@ df_50 = df_50.drop(df_50.columns[len(df_50.columns)-1], axis=1)
 # classification_80 = multinomial_naive_bayes(df_80, data_uji, kelas_fake, kelas_true)
 # classification_70 = multinomial_naive_bayes(df_70, data_uji, kelas_fake, kelas_true)
 # classification_60 = multinomial_naive_bayes(df_60, data_uji, kelas_fake, kelas_true)
-classification_50 = multinomial_naive_bayes(df_50, data_uji, kelas_fake, kelas_true)
+# classification_50 = multinomial_naive_bayes(df_50, data_uji, kelas_fake, kelas_true)
 # classification_40 = multinomial_naive_bayes(df_40, data_uji, kelas_fake, kelas_true)
 # classification_30 = multinomial_naive_bayes(df_30, data_uji, kelas_fake, kelas_true)
 # classification_20 = multinomial_naive_bayes(df_20, data_uji, kelas_fake, kelas_true)
 # classification_10 = multinomial_naive_bayes(df_10, data_uji, kelas_fake, kelas_true)
 
-klasifikasi = pd.concat([test_data.tweet, test_data.label, classification_50], axis=1)
+# klasifikasi = pd.concat([test_data.tweet, test_data.label, classification_50], axis=1)
 
-print(klasifikasi)
+# print(klasifikasi)
 
 # print('\nClasification report 100% :\n', classification_report(test_data['label'].reset_index(drop=True),
 #                                                          classification_100))
@@ -370,8 +376,8 @@ print(klasifikasi)
 # print('\nClasification report 60% :\n', classification_report(test_data['label'].reset_index(drop=True),
 #                                                          classification_60))
 
-print('\nClasification report 50% :\n', classification_report(test_data['label'].reset_index(drop=True),
-                                                          classification_50))
+# print('\nClasification report 50% :\n', classification_report(test_data['label'].reset_index(drop=True),
+#                                                     classification_50))
 
 # print('\nClasification report 40% :\n', classification_report(test_data['label'].reset_index(drop=True),
 #                                                          classification_40))
