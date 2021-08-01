@@ -56,8 +56,8 @@
             $train = $this->input->get('training');
             $test  = $this->input->get('testing');
 
-            $limitTrue = 20;
-            $limitFake = 20;
+            $limitTrue = 10;
+            $limitFake = 10;
             $threshold = $this->input->get('threshold');
 
             // ambil data prepro 
@@ -85,6 +85,9 @@
             }
 
 
+            // suffle 
+            shuffle($dataPrepro);
+
 
             // pembagian train and test
             $hitungJumlahPrepro = count($dataPrepro);
@@ -98,10 +101,10 @@
 
 
             // echo "Jumlah training ". count( $dataTraining );
-            // foreach ( $dataTraining AS $training ) {
+            foreach ( $dataPrepro AS $training ) {
 
-            //     echo $training['tweet'].'<br>';
-            // }      
+                // echo $training['label'].'-'.$training['tweet'].'<br>';
+            }      
             // echo '<hr>';
             // echo "Jumlah testing ". count( $dataTesting );
 
@@ -117,6 +120,11 @@
                 // echo $test['tweet'].'<br>';
                 // echo "Ekspekstasi ". $test['label'].'<br>';
                 $prediksi = $this->model( $threshold, $dataTraining, $test['tweet'] );
+                $label = false;
+                if ( $test['label'] == "true" ) {
+
+                    $label = true;
+                }
                 // echo '<hr>';
                 array_push( $result, array(
 
@@ -127,17 +135,49 @@
 
 
                 // confusion matrix 
-                $prediksi = $prediksi ? "true" : "fake";
+                // echo 'Hasil '. $test['label'].' '.($prediksi ? "true" : "fake").'<br>';
                 
-                // True Positive
-                if ( $test['label'] == $prediksi ) $TP++;
+                if ( $label == true && $prediksi == true ) $TP++;
+                if ( $label == false && $prediksi == false ) $TN++;
+                if ( $label == true && $prediksi == false ) $FP++;
+                if ( $label == false && ($prediksi == true) ) $FN++;
 
-                
 
+                // echo '<hr>';
+
+                // if ( !$label == $prediksi ) $TN++;
             }      
 
 
-            return $result;
+            // echo count( $dataTesting ).'<br>';
+            // echo $TP.' '.$FP.' '.$FN.' '.$TN.'<hr>';
+
+            // Accuracy : (TP + TN) / (TP + FP + FN + TN)
+            // Precission = TP / (TP + FP)
+            // Recall = TP / (TP + FN)
+            // Specificity = TN / (TN + FP)
+
+            $accuracy = ($TP + $TN) / ($TP + $FP + $FN + $TN);
+            $precission = (($TP + $FP) > 0) ? $TP / ($TP + $FP) : 0;
+            $recall = $TP + $FN > 0 ? $TP / ($TP + $FN) : 0;
+            $specificity = ($TN + $FP) > 0 ? $TN / ($TN + $FP) : 0;
+
+
+            // echo 'accuracy '. ($accuracy * 100).'<br>';
+            // echo 'precission '. ($precission * 100).'<br>';
+            // echo 'recall '. ($recall * 100).'<br>';
+            // echo 'specificity '. ($specificity * 100).'<br>';
+            // echo 'accurate '. $accuracy * 100.'<br>';
+            // echo 'precission '. 
+            
+
+
+            
+            return array(
+
+                'data'      => $result,
+                'accuracy'  => $accuracy * 100
+            );
 
         }
 
@@ -193,6 +233,8 @@
                 $res_true = ($row['ibw1_true'] + 1) / ( $CTrue + $jumlahDataThreshold );
                 $res_fake = ($row['ibw1_fake'] + 1) / ( $CFake + $jumlahDataThreshold );
 
+                // echo '<h1>'.$CFake.'</h1>';
+
 
                 if ( $proses == 0) {
 
@@ -235,18 +277,18 @@
             // echo '<hr>';
 
             // echo 'Berdasarkan perhitungan hasil kategori map diatas dengan threshold '.$percentage.'%: <br>';
-            // echo '<br><b>Kalimat : '.$query.'</b>';
+            // echo '<br><b>Kalimat : '.$query.'</b><br>';
             // if ( $hasilMapTrue > $hasilMapFake ) {
 
             //     echo '<h1>Klasifikasi True</h1>';
-            //     echo 'dengan nilai '. $hasilMapTrue;
+            //     echo 'dengan nilai '. $hasilMapTrue.' '.$hasilMapFake;
             // } else {
 
             //     echo '<h1>Klasifikasi Fake</h1>';
             //     echo 'dengan nilai '. $hasilMapFake.'<br>';
             // }
             // echo "Maka ". max($hasilMapTrue, $hasilMapFake).'<br>';
-
+            // echo '<hr>';
             // echo count( $seleksi_berdasarkan_query );
 
 
@@ -334,10 +376,14 @@
                     }
                 }
 
-                if ( $teksTweet['label'] == true ) $totalLabelTrue++;
-                else $totalLabelFake++;
-            }
+                // print_r($teksTweet).'<br><br>';
 
+                if ( $teksTweet['label'] == "true" ) {
+                    $totalLabelTrue++;
+                } else $totalLabelFake++;
+            }
+            
+            // echo '<hr>';
 
             
             /** Lanjutan pembobotan 4.2  */
@@ -453,6 +499,7 @@
             // Prior
             $entroTrue  = $totalLabelTrue / count($dataPrepo);
             $entroFake = $totalLabelFake / count($dataPrepo);
+            // echo '<script>alert('.$totalLabelFake.')</script>';
 
 
             $entropy = -($entroTrue * log10($entroTrue) ) - ($entroFake * log10($entroFake) );
@@ -526,6 +573,10 @@
                     'ibw0_fake' => $attr['ibw0_fake'],
                 ) );
 
+
+
+                // print_r( $data_informationGain );
+                // echo '<hr>';
                 
                 
                 
@@ -541,7 +592,7 @@
             // echo '<hr>';
 
             // sorting value of information gain
-            // $data_informationGain = $this->array_sort( $data_informationGain, 'word', SORT_ASC);
+            $data_informationGain = $this->array_sort( $data_informationGain, 'word', SORT_ASC);
             $data_informationGain = $this->array_sort( $data_informationGain, 'information_gain', SORT_DESC);
             
             

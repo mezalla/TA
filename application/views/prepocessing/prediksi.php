@@ -101,10 +101,18 @@
                                                 <div class="card-title">
                                                     <h3 class="card-label">Klasifikasi
                                                     <span class="d-block text-muted pt-2 font-size-sm">Berikut adalah data preprocessing yang sudah tersimpan</span></h3>
-                                                </div>
-                                                
+                                                </div>                                                
                                             </div>
                                             <div class="card-body">
+
+                                                <?php 
+
+                                                if ( $this->input->get('training') ) {
+
+                                                    echo '<h1>'.$klasifikasi['accuracy'].'%</h1>
+                                                    <label>Nilai Akurasi dengan threshold '.$threshold.'%</label> <hr>';
+                                                }
+                                                ?>
                                                 <!--begin: Datatable-->
                                                 <table class="table table-bordered" id="kt_datatable">
                                                     <thead>
@@ -116,14 +124,18 @@
                                                         </tr>
                                                     </thead>
                                                     <tbody>
-                                                        <?php $no = 1; foreach ( $klasifikasi AS $row ) : ?>
+                                                        <?php 
+
+                                                        if ( count($klasifikasi) > 0 ) {
+                                                        $no = 1; 
+                                                        foreach ( $klasifikasi['data'] AS $row ) : ?>
                                                         <tr>
                                                             <td><?php echo $no++ ?></td>
                                                             <td><?php echo $row['tweet'] ?></td>
                                                             <td><?php echo $row['label'] ?></td>
                                                             <td><?php echo $row['prediksi'] ?></td>
                                                         </tr>
-                                                        <?php endforeach; ?>
+                                                        <?php endforeach; } ?>
                                                     </tbody>
                                                 </table>
                                             </div>
