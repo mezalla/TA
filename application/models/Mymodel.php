@@ -27,6 +27,41 @@
 
             return $this->db->get('prepro');
         }
+
+
+
+        function prosesInsertDataExcel() {
+
+            $config['upload_path']    = './dist/assets/excel/';
+            $config['allowed_types']  = 'xlsx';
+            $config['max_size']       = 20000; // 20 mb max
+            $config['file_name']      = uniqid();
+
+            $this->load->library('upload', $config);
+
+            $file_excel = "";
+            if ( $this->upload->do_upload('userfile')) {
+
+                $file_excel = $this->upload->data('file_name');
+
+            } else {
+
+                $html = '<div class="alert alert-danger">'.$this->upload->display_errors().'</div>';
+                $this->session->set_flashdata('pesan', $html);
+
+                redirect('crawling');
+            }
+            return $file_excel;
+        }
+
+
+
+        // 
+        function insert_multiple( $data ) {
+
+            $this->db->insert_batch('tweepy_raw', $data);
+            redirect('crawling');
+        }
     }
     
     /* End of file M_crawling.php */

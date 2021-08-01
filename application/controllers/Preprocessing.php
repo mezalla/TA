@@ -49,6 +49,10 @@
 
 
 
+
+
+
+
         function proses() {
 
             $dataPrepro = array();
@@ -56,8 +60,8 @@
             $train = $this->input->get('training');
             $test  = $this->input->get('testing');
 
-            $limitTrue = 5;
-            $limitFake = 5;
+            $limitTrue = 150;
+            $limitFake = 150;
             $threshold = $this->input->get('threshold');
 
             // ambil data prepro 
@@ -139,7 +143,7 @@
             // echo "Jumlah training ". count( $dataTraining );
             foreach ( $dataPrepro AS $training ) {
 
-                echo $training['label'].'-'.$training['tweet'].'<br>';
+                // echo $training['label'].'-'.$training['tweet'].'<br>';
             }      
             // echo '<hr>';
             // echo "Jumlah testing ". count( $dataTesting );
@@ -173,15 +177,19 @@
                 // confusion matrix 
                 // echo 'Hasil '. $test['label'].' '.($prediksi ? "true" : "fake").'<br>';
                 
+                // if ( $label == true && $prediksi == true ) $TP++;
+                // if ( $label == false && $prediksi == false ) $TN++;
+                // if ( $label == true && $prediksi == false ) $FP++;
+                // if ( $label == false && ($prediksi == true) ) $FN++;
+
+
                 if ( $label == true && $prediksi == true ) $TP++;
+                if ( $label == true && $prediksi == false ) $FN++;
+                if ( $label == false && $prediksi == true ) $FP++;
                 if ( $label == false && $prediksi == false ) $TN++;
-                if ( $label == true && $prediksi == false ) $FP++;
-                if ( $label == false && ($prediksi == true) ) $FN++;
 
 
                 // echo '<hr>';
-
-                // if ( !$label == $prediksi ) $TN++;
             }      
 
 
@@ -194,7 +202,7 @@
             // Specificity = TN / (TN + FP)
 
             $accuracy = ($TP + $TN) / ($TP + $FP + $FN + $TN);
-            $precission = (($TP + $FP) > 0) ? $TP / ($TP + $FP) : 0;
+            $precision = (($TP + $FP) > 0) ? $TP / ($TP + $FP) : 0;
             $recall = $TP + $FN > 0 ? $TP / ($TP + $FN) : 0;
             $specificity = ($TN + $FP) > 0 ? $TN / ($TN + $FP) : 0;
 
@@ -203,7 +211,6 @@
             // echo 'precission '. ($precission * 100).'<br>';
             // echo 'recall '. ($recall * 100).'<br>';
             // echo 'specificity '. ($specificity * 100).'<br>';
-            // echo 'accurate '. $accuracy * 100.'<br>';
             // echo 'precission '. 
             
 
@@ -212,7 +219,9 @@
             return array(
 
                 'data'      => $result,
-                'accuracy'  => $accuracy * 100
+                'accuracy'  => $accuracy * 100,
+                'precision' => $precision * 100,
+                'recall'    => $recall * 100
             );
 
         }
@@ -220,7 +229,11 @@
 
 
 
-        function model( $percentage, $dataTraining, $query ){
+        
+
+
+
+        function model( $percentage , $dataTraining, $query ){
 
             // $query = "vaksin covid mutasi ribu covid dunia";
 
@@ -431,7 +444,6 @@
 
             foreach ( $dataTerm AS $teks ) {
 
-                // echo '<h1>'.$teks.' '.count($dataTerm).'</h1>';
                 // ambil data teks tweet
 
                 // total true dan false 
@@ -458,9 +470,15 @@
                     foreach ( $splitTeks AS $split ) {
 
                         if ( $split == $teks ) { // found : 1
+                            
 
-                            if ( $teksTweet['label'] == true ) $found_True = 1;
-                            else $found_False = 1;
+                            if ( $teksTweet['label'] == "true" ) {
+                                
+                                $found_True = 1;
+                            } else {
+
+                                $found_False = 1;
+                            }
                             
                             $status_datateks = true;
 
@@ -469,11 +487,11 @@
                     // status data teks
                     if ( $status_datateks == false ) {
 
-                        if ( $teksTweet['label'] == true ) $empty_True = 1;
+                        if ( $teksTweet['label'] == "true" ) $empty_True = 1;
                         else $empty_False = 1;
                     }
 
-
+                    // echo 'Pencocokan '.$teksTweet['label'].'<br>';
                     // echo '<small>Output tweet : </small> <br>';
                     // echo "True : ". $found_True.' False: '. $found_False;
 
@@ -498,8 +516,11 @@
                  * 
                  */
                 
+                // echo $teks;
                 // echo '<br><small>True : '.$countingAlwaysTrue_1.' &emsp; False :'. $countingAlwaysFalse_1.'</small><br>'; 
                 // echo '<br><small>True : '.$countingAlwaysTrue_0.' &emsp; False :'. $countingAlwaysFalse_0.'</small><br>'; 
+
+                // echo '<hr>';
 
 
                 // hitung IBW : yang berstatus 1 
@@ -708,6 +729,141 @@
             }
 
             return $new_array;
+        }
+
+
+
+
+
+
+        function pengujian() {
+
+            // 80 : 20 | 20 data
+            // 0   vaksinasi waspada bantu lindung orang orang i...  true     true
+            // 1  selamat idulfitri lupa waspada laku tindak ceg...  true     true
+            // 2  libur kali hati hati covid anjur perintah jaga...  true     true
+            // 3       kuak nyata jamaah haji indonesia tolak covid  fake     fake
+
+            // Clasification report 50% :
+            //             precision    recall  f1-score   support
+
+            //         fake       1.00      1.00      1.00         1
+            //         true       1.00      1.00      1.00         3
+
+            //     accuracy                           1.00         4
+            // macro avg       1.00      1.00      1.00         4
+            // weighted avg       1.00      1.00      1.00         4
+
+
+
+            $training = array(
+                array(
+            
+                    'tweet' => "musim libur kali protokol sehat atur perintah covid nikmat kualitas dirumahaja laku temu teman teman keluarga virtual iya",
+                    'label' => "true",
+                ),
+                array(
+            
+                    'tweet' => "pandemi covid juta tembakau henti ayo gabung juta orang henti tembakau jenis",
+                    'label' => "true",
+                ),
+                array(
+            
+                    'tweet' => "kasir chandra karang nyata positive covid",
+                    'label' => "fake",
+                ),
+                array(
+            
+                    'tweet' => "libur lupa terap tindak tindak cegah covid iya",
+                    'label' => "true",
+                ),
+                array(
+            
+                    'tweet' => "kasad klarifikasi anggota tni bandung nyata ban positif kena covid",
+                    'label' => "fake",
+                ),
+                array(
+            
+                    'tweet' => "fabiana souza terima perdana sunti vaksin covid tinggal dunia rs sao lucas porto alegre brazil selatan",
+                    'label' => "fake",
+                ),
+                array(
+            
+                    'tweet' => "nyata demo kena covid",
+                    'label' => "fake",
+                ),
+                array(
+            
+                    'tweet' => "simpul rob oswald covid khayal fiktif",
+                    'label' => "fake",
+                ),
+                array(
+            
+                    'tweet' => "foto gubernur anies pegang piagam tulis harga provinsi covid ",
+                    'label' => "fake",
+                ),
+                array(
+            
+                    'tweet' => "covid betapa sistem sehat kuat capai cakup sehat semesta komitmen solidaritas tara amp pesan sekretaris jenderal pbb world health assembly wha weeklyrecap",
+                    'label' => "true",
+                ),
+                array(
+            
+                    'tweet' => "orang hadap hilang covid sedia proses pikir asa bantu perspektif tenang terima situasi kesehatanjiwa mentalhealth",
+                    'label' => "true",
+                ),
+                array(
+            
+                    'tweet' => "vaksin covid vaksinasi iya ragu ragu vaksinasi terap tindak cegah",
+                    'label' => "true",
+                ),
+                array(
+            
+                    'tweet' => "terap tindak cegah covid sakit gejala sehat dirumahaja hindar temu orang iya",
+                    'label' => "true",
+                ),
+                array(
+            
+                    'tweet' => "mayat positif covid kubur daster sesuai syariat fardhu kifayah islam",
+                    'label' => "fake",
+                ),
+                array(
+            
+                    'tweet' => "pesan beranta rekrutmen rawan rawat pasien covid wisma atlet dokter irna",
+                    'label' => "fake",
+                ),
+                array(
+            
+                    'tweet' => "raja thailand panggil ulama islam baca doa tolak bala covid",
+                    'label' => "fake",
+                )
+            );
+
+
+            $testing = array(
+
+                array(
+                    'tweet' => "vaksinasi waspada bantu lindung orang orang iya kena masker tindak cegah covid",
+                    'label' => "true",
+                ),
+                array(
+                    'tweet' => "selamat idulfitri lupa waspada laku tindak cegah covid stay safe and healthy iya",
+                    'label' => "true",
+                ),
+                array(
+                    'tweet' => "libur kali hati hati covid anjur perintah jaga sehat laku tindak cegah lindung orang orang lengah iya",
+                    'label' => "true",
+                ),
+                array(
+                    'tweet' => "kuak nyata jamaah haji indonesia tolak covid",
+                    'label' => "fake",
+                ),
+            );
+
+
+            echo '<h1>'.$testing[3]['tweet'].'</h1>';
+            $result = $this->model(50, $training, $testing[3]['tweet']);
+
         }
 
     
