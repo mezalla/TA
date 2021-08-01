@@ -56,8 +56,8 @@
             $train = $this->input->get('training');
             $test  = $this->input->get('testing');
 
-            $limitTrue = 10;
-            $limitFake = 10;
+            $limitTrue = 5;
+            $limitFake = 5;
             $threshold = $this->input->get('threshold');
 
             // ambil data prepro 
@@ -86,7 +86,43 @@
 
 
             // suffle 
-            shuffle($dataPrepro);
+            
+            $cekTrain = $this->session->userdata('sess_train');
+            if ( empty($cekTrain) ) {
+
+                shuffle($dataPrepro);
+                // save in session
+                $dataSession = array(
+
+                    'sess_train'    => $train,
+                    'sess_test'     => $test,
+                    'prepro'        => $dataPrepro
+                );
+                $this->session->set_userdata($dataSession);
+                
+            
+            } else {
+
+                $cekTest = $this->session->userdata('sess_test');
+                if ( ($cekTrain != $train) || ($cekTest != $test) ) {
+
+
+                    shuffle($dataPrepro);
+
+                    // save in session
+                    $dataSession = array(
+
+                        'sess_train'    => $train,
+                        'sess_test'     => $test,
+                        'prepro'        => $dataPrepro
+                    );
+                    $this->session->set_userdata($dataSession);
+                } 
+            }
+
+
+            $dataPrepro = $this->session->userdata('prepro');
+            
 
 
             // pembagian train and test
@@ -103,7 +139,7 @@
             // echo "Jumlah training ". count( $dataTraining );
             foreach ( $dataPrepro AS $training ) {
 
-                // echo $training['label'].'-'.$training['tweet'].'<br>';
+                echo $training['label'].'-'.$training['tweet'].'<br>';
             }      
             // echo '<hr>';
             // echo "Jumlah testing ". count( $dataTesting );
