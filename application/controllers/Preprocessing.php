@@ -28,12 +28,127 @@
 
 
 
-        function model( $percentage ){
+        function hasil(){
+
+            $data['klasifikasi'] = array();
+            if ( $this->input->get('threshold') ) {
+
+                $data['klasifikasi'] = $this->proses();
+            }
+
+            // header
+            $this->load->view('template/template_header');
+
+            // content
+            $this->load->view('prepocessing/prediksi', $data);
+            // $this->load->view('prepocessing/prediksi');
+
+            // footer
+            $this->load->view('template/template_footer');
+        }
 
 
-            $query = "vaksin covid mutasi ribu covid dunia";
 
-            $result = $this->perhitungan( $percentage );
+        function proses() {
+
+            $dataPrepro = array();
+
+            $train = $this->input->get('training');
+            $test  = $this->input->get('testing');
+
+            $limitTrue = 20;
+            $limitFake = 20;
+            $threshold = $this->input->get('threshold');
+
+            // ambil data prepro 
+            $ambilDataPreproTrue = $this->Mymodel->model_ambildatapreprocessingByEvent('true', $limitTrue);
+            $ambilDataPreproTFake = $this->Mymodel->model_ambildatapreprocessingByEvent('fake', $limitFake);
+
+
+            foreach ( $ambilDataPreproTrue->result_array() AS $rowT ) {
+
+                array_push( $dataPrepro, array(
+
+                    'tweet' => $rowT['text'],
+                    'label' => $rowT['label']
+                ) );
+            }
+
+
+            foreach ( $ambilDataPreproTFake->result_array() AS $rowF ) {
+
+                array_push( $dataPrepro, array(
+
+                    'tweet' => $rowF['text'],
+                    'label' => $rowF['label']
+                ) );
+            }
+
+
+
+            // pembagian train and test
+            $hitungJumlahPrepro = count($dataPrepro);
+            $jumlahTraining = intval( $hitungJumlahPrepro * ($train / 100) );
+            $jumlahTesting = intval( $hitungJumlahPrepro * ($test / 100) );
+
+
+            /** Nilai untuk data training */
+            $dataTraining = array_slice( $dataPrepro, 0, $jumlahTraining );
+            $dataTesting  = array_slice( $dataPrepro, $jumlahTraining, $hitungJumlahPrepro );
+
+
+            // echo "Jumlah training ". count( $dataTraining );
+            // foreach ( $dataTraining AS $training ) {
+
+            //     echo $training['tweet'].'<br>';
+            // }      
+            // echo '<hr>';
+            // echo "Jumlah testing ". count( $dataTesting );
+
+
+
+            $result = array();
+            $TN = 0;
+            $TP = 0;
+            $FN = 0;
+            $FP = 0;
+            foreach ( $dataTesting AS $test ) {
+
+                // echo $test['tweet'].'<br>';
+                // echo "Ekspekstasi ". $test['label'].'<br>';
+                $prediksi = $this->model( $threshold, $dataTraining, $test['tweet'] );
+                // echo '<hr>';
+                array_push( $result, array(
+
+                    'tweet' => $test['tweet'],
+                    'label'     => $test['label'],
+                    'prediksi'  => $prediksi ? "true" : "fake"
+                ) );
+
+
+                // confusion matrix 
+                $prediksi = $prediksi ? "true" : "fake";
+                
+                // True Positive
+                if ( $test['label'] == $prediksi ) $TP++;
+
+                
+
+            }      
+
+
+            return $result;
+
+        }
+
+
+
+
+        function model( $percentage, $dataTraining, $query ){
+
+            // $query = "vaksin covid mutasi ribu covid dunia";
+
+            $result = $this->perhitungan( $percentage, $dataTraining );
             
             // seleksi data 
             $data_seleksi = $result['data_information_gain'];
@@ -90,20 +205,20 @@
                 }
 
 
-                echo 'hasil proses -'. ($proses + 1).'<br> <small>';
+                // echo 'hasil proses -'. ($proses + 1).'<br> <small>';
 
-                echo 'Word : '. $row['word'].'<br>';
-                echo 'TRUE : '. $res_true.'<br>';
-                echo 'FAKE : '. $res_fake.'<br>';
-                echo '<b>'.$mapTRUE.' | '.$mapFAKE.'</b></small>';
-                echo '<hr>';
+                // echo 'Word : '. $row['word'].'<br>';
+                // echo 'TRUE : '. $res_true.'<br>';
+                // echo 'FAKE : '. $res_fake.'<br>';
+                // echo '<b>'.$mapTRUE.' | '.$mapFAKE.'</b></small>';
+                // echo '<hr>';
 
 
                 // echo $row['word'].' PTrue : '. $res_true;
                 // echo '<b>'.$row['word'].'</b><br>';
                 // echo '<small>Nilai label true and fake ('.$row['ibw1_true'].', '.$row['ibw1_fake'].')</small><br>';
                 // echo '<small>Hasil | TRUE :'.$res_true.' | FAKE : '.$res_fake.'</small>';
-                // // print_r( $row );
+                // print_r( $row );
                 // echo '<hr>';
 
                 $proses++;
@@ -115,71 +230,73 @@
             $hasilMapTrue = $mapTRUE * $true; 
             $hasilMapFake = $mapFAKE * $fake; 
 
-            echo '<b>Perbandingan Map TRUE | FAKE</b> <br>';
-            echo $hasilMapTrue.' &emsp;|&emsp; '.$hasilMapFake;
-            echo '<hr>';
+            // echo '<b>Perbandingan Map TRUE | FAKE</b> <br>';
+            // echo $hasilMapTrue.' &emsp;|&emsp; '.$hasilMapFake;
+            // echo '<hr>';
 
-            echo 'Berdasarkan perhitungan hasil kategori map diatas dengan threshold '.$percentage.'%: <br>';
-            echo '<b>Kalimat : '.$query.'</b>';
+            // echo 'Berdasarkan perhitungan hasil kategori map diatas dengan threshold '.$percentage.'%: <br>';
+            // echo '<br><b>Kalimat : '.$query.'</b>';
+            // if ( $hasilMapTrue > $hasilMapFake ) {
+
+            //     echo '<h1>Klasifikasi True</h1>';
+            //     echo 'dengan nilai '. $hasilMapTrue;
+            // } else {
+
+            //     echo '<h1>Klasifikasi Fake</h1>';
+            //     echo 'dengan nilai '. $hasilMapFake.'<br>';
+            // }
+            // echo "Maka ". max($hasilMapTrue, $hasilMapFake).'<br>';
+
+            // echo count( $seleksi_berdasarkan_query );
+
+
+            // return value
+
+            $prediksi = false;
             if ( $hasilMapTrue > $hasilMapFake ) {
 
-                echo '<h1>Klasifikasi True</h1>';
-                echo 'dengan nilai '. $hasilMapTrue;
-            } else {
-
-                echo '<h1>Klasifikasi Fake</h1>';
-                echo 'dengan nilai '. $hasilMapFake;
+                $prediksi = true;
             }
-            // echo max($hasilMapTrue, $hasilMapFake);
 
-            
-            
-            
-            
-
-
-
-            
-
-
-            echo count( $seleksi_berdasarkan_query );
+            return $prediksi;
             
         }
 
 
 
         // perhitungan dari information gain
-        function perhitungan( $percentage ) {
+        function perhitungan( $percentage, $dataPrepo ) {
 
             /**
              * 
              *  4. 1 Dataset Clean
              * 
              */
-            $dataPrepo = array(
 
-                array(
+            // $dataPrepo = array(
 
-                    'tweet' => "ragu vaksinasi covid bukti efektivitas aman",
-                    'label' => true,
-                ),
-                array(
+            //     array(
 
-                    'tweet' => "who vaksin daftar uea lindung varian delta",
-                    'label' => true,
-                ),
-                array(
+            //         'tweet' => "ragu vaksinasi covid bukti efektivitas aman",
+            //         'label' => true,
+            //     ),
+            //     array(
 
-                    'tweet' => "vaksin covid mutasi ribu covid dunia",
-                    'label' => false,
-                ),
-                array(
+            //         'tweet' => "who vaksin daftar uea lindung varian delta",
+            //         'label' => true,
+            //     ),
+            //     array(
 
-                    'tweet' => "vaksin covid rusak sel otak sel darah",
-                    'label' => false,
-                ),
-            );
+            //         'tweet' => "vaksin covid mutasi ribu covid dunia",
+            //         'label' => false,
+            //     ),
+            //     array(
 
+            //         'tweet' => "vaksin covid rusak sel otak sel darah",
+            //         'label' => false,
+            //     ),
+            // );
+            
 
 
             /**
@@ -222,6 +339,7 @@
             }
 
 
+            
             /** Lanjutan pembobotan 4.2  */
             $dataTermPresence = array();
             
@@ -231,7 +349,7 @@
 
             foreach ( $dataTerm AS $teks ) {
 
-                // echo '<h1>'.$teks.'</h1>';
+                // echo '<h1>'.$teks.' '.count($dataTerm).'</h1>';
                 // ambil data teks tweet
 
                 // total true dan false 
@@ -423,7 +541,7 @@
             // echo '<hr>';
 
             // sorting value of information gain
-            $data_informationGain = $this->array_sort( $data_informationGain, 'word', SORT_ASC);
+            // $data_informationGain = $this->array_sort( $data_informationGain, 'word', SORT_ASC);
             $data_informationGain = $this->array_sort( $data_informationGain, 'information_gain', SORT_DESC);
             
             

@@ -17,6 +17,16 @@
 
             return $this->db->get('prepro');
         }
+
+
+
+        function model_ambildatapreprocessingByEvent( $label, $limit ) {
+
+            $this->db->where('label', $label);
+            $this->db->limit($limit);
+
+            return $this->db->get('prepro');
+        }
     }
     
     /* End of file M_crawling.php */

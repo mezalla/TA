@@ -179,20 +179,8 @@ License: You must have a valid license purchased only from themeforest(the above
 														</a>
 													</li>
 													<li class="menu-item menu-item-submenu menu-item-rel" aria-haspopup="true">
-														<a href="javascript:;" class="menu-link ">
-															<span class="menu-text">Information Gain</span>
-															<span class="menu-desc"></span>
-														</a>
-													</li>
-													<li class="menu-item menu-item-submenu" aria-haspopup="true">
-														<a href="javascript:;" class="menu-link">
-															<span class="menu-text">Multinomial Naive Bayes</span>
-															<span class="menu-desc"></span>
-														</a>
-													</li>
-													<li class="menu-item menu-item-submenu" aria-haspopup="true">
-														<a href="javascript:;" class="menu-link">
-															<span class="menu-text">Akurasi</span>
+														<a href="<?php echo base_url('preprocessing/hasil') ?>" class="menu-link ">
+															<span class="menu-text">Klasifikasi</span>
 															<span class="menu-desc"></span>
 														</a>
 													</li>
